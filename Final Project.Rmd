@@ -5,6 +5,7 @@ date: "October 28th, 2020"
 output: pdf_document
 ---
 
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
@@ -92,11 +93,18 @@ data_n <- na.omit(data)
 
 ## Descriptive Analysis\
 
-### Histogram for Age
+### Setting default plot sizes\
+
+```{r, echo=TRUE}
+options(repr.plot.width = 14, repr.plot.height = 8)
+```
+
+### Histogram for Age\
 
 ```{r, echo=TRUE}
 hist(data$Age)
 ```
+
 Figure 1\
 
 In Figure 1 we can see the age distribution shows the mean age between 25-35 years old. We can see there is a significantly larger right tail than left tail. With a large amount of young children, all, more than likely related to other passengers (their parents). The plot resembles a normal distribution in its concentration of individuals around the mean.
@@ -105,11 +113,12 @@ There are very few old people, which we could speculate could be due to the sign
 
 \newpage
 
-### Histogram for Fare
+### Histogram for Fare\
 
 ```{r, echo=TRUE}
 hist(data$Fare)
 ```
+
 Figure 2\
 
 According to Figure 2 on our second continuous variable (Fare), we notice a significantly different 
@@ -126,4 +135,237 @@ For reference, the ticket prices to board the titanic were the following (in 191
 
 The conversion rate for £1 (in 1912) would be £115 (in 2019), which shows that even the cheapest tickets (while maybe relatively cheap to board a transatlantic cruise) were still relatively expensive by 1912 standards.
 
-### Fitting distributions to data:
+\newpage
+
+### Fitting the normal distribution to Age\
+
+```{r, echo=TRUE}
+plot(summary(fitdist(data_n$Age,"norm")))
+```
+
+Figure 3\
+
+The age variable seems to show relative normality pretty much across the board with the exception of the slightly larger than usual right tail, as we saw in the histogram previously. This right tail can also be seen differring from a normal distribution in the QQ-plot, however, this overall doesn't hurt the relative normality the variable shows.
+
+We can see the mean very very slightly to the right of a gaussian curve and a slightly longer left tail. Given the current size of the sample we could, perhaps, theorize that the set probably comes from a normal distribution.
+
+An interesting thing to think about would be to, with proper statistical analysis, extrapolate the sample data to the population (everyone aboard the titanic) to see if it accurately describes the reality of the whole ship crew plus passengers. It would be out of the scope of this project, but quite interesting to think about.
+
+\newpage
+
+### Fitting a gamma distribution to Fare\
+
+```{r, echo=TRUE}
+plot(summary(fitdist(data_n$Fare+1,"gamma")))
+```
+
+Figure 4\
+
+First of all, before plotting, we must sum a constant to Fare, we have chosen 1 to keep values relatively close to the original ones. As some fares are too low and by the nature of the gamma distribution these values would explode. 
+
+We can see that the data seems to follow a gamma distribution , with the exception of its incredibly long tail, which to an extent seems to fall above the theoretical quantiles in the QQ-plot, while the PP-plot seems to favour the left tail above the right tail.
+
+We particularly like this variable as it is interesting to play with and seems to say a lot about the passengers aboard the boat and definitely does not seem to exhibit normality as most of the entries concentrate above relatively low prices, which matches very well the proportion of people in each class.
+
+Boarding the ship wasn't exactly cheap, but we know for a fact that luxury tickets were significantly more expensive than third/second class tickets, therefore making the amount of people able to afford such cabins significantly lower.
+
+\newpage
+
+### Boxplot for Age\
+
+```{r, echo=TRUE}
+five <- data.frame(x=rep(1,5), five=fivenum(data_n$Age))
+
+ggplot(data=data_n, aes(x=0, y=data_n$Age)) + 
+    geom_boxplot() + 
+    theme(text = element_text(size=18)) +
+    ylab("Age") +
+    scale_x_discrete(breaks = NULL) +
+    geom_text(data=five, aes(x=0, y=five, label=five),nudge_x =0.5)
+```
+
+Figure 5\
+
+In the Figure 5 we see a boxplot for age with the median at 28, the 25th percentile at 20, the 75th percentile at 38, maximum value at 80 and minimum value at 0.42 (referring to a baby of less than 1 year old).
+
+This shows the wide margin of ages within the ship very clearly. There were all sorts of people of all ages, predominantly men, but definitely all ages.
+
+Older people are a bit more scarce for many reasons, but we could easily attribute such disparity to the life expectancy at the time, which we mentioned previously sat at around 51-55 years old in England.
+
+The relative fragile state of old people during these times, the fact that they might have been significantly more frail than nowadays our old family members are could have discouraged them. Or maybe the cruise trip was simply marketed for younger people and families. However, all these are merely hypotheses.
+
+\newpage
+
+### Boxplot for Fare\
+
+```{r, echo=TRUE, results='hide', warning=FALSE, message=FALSE}
+five <- data.frame(x=rep(1,5), five=fivenum(data_n$Fare))
+
+ggplot(data=data_n, aes(x=0, y=data_n$Fare)) + 
+    geom_boxplot() + 
+    theme(text = element_text(size=18)) +
+    ylab("Fare") +
+    scale_x_discrete(breaks = NULL) +
+    geom_text(data=five, aes(x=0, y=five, label=five),nudge_x =0.5, size=1.7)
+```
+
+Figure 6\
+
+This boxplot for fare shows a really interesting pattern, similar to what the histogram painted. We can see the 25th and 75th percentile at 8.05 and 33.5 respectively, while the values in between represent most of the data and therefore most of the passengers.
+
+All values above 100 are quite scarce, given that even at 100 GBP, the price was already significantly above the 30 GBP base fare for 1st class. These extreme values which peak at a very far maximum of about 512.33 (the maximum fare) represent a very small subset of very wealthy passengers above the ship.
+
+Our minimum value is 0, which might represent children who probably didn't pay a fare, as maybe part of an offer for very very young children, which were, in fact, aboard the ship.
+
+\newpage
+
+### Quantiles for Age\
+
+```{r, echo=TRUE, results='hide', warning=FALSE, message=FALSE, fig.width=7, fig.height=3.5}
+plot(quantile(data_n$Age))
+```
+
+Figure 7\
+
+In the following plot we can see the quantiles more clearly for Age.\
+
+### Quantiles for Fare\
+
+```{r, echo=TRUE, results='hide', warning=FALSE, message=FALSE, fig.width=7, fig.height=3.5}
+plot(quantile(data_n$Fare))
+```
+
+Figure 8\
+
+In the following plot we can see the quantiles more clearly for Fare\
+
+Both these plots clearly show the extreme nature of maximum values, especially for Fare.
+
+\newpage
+
+### Correlation between Age and Fare\
+
+```{r, echo=TRUE}
+log_data_n = data_n %>% mutate(logAge = log(Age), logFare = log(Fare+100))
+ggplot(data=log_data_n, aes(x=logFare, y=logAge)) + 
+    geom_point() +
+    theme(text = element_text(size=18))
+```
+
+Figure 9\
+
+We decided to apply a log transformation for our plot in order to maybe try to make a plot that would better resemble one with a higher spearman correlation coefficient than what a pearson correlation coefficient would yield. However, such coefficient is not significantly larger, as the variables are not quite correlated.
+
+The correlation is extremely low and even if we could draw a line to represent the shape both variables combined would take, we would really not show anything particularly relevant.
+
+We decided to calculate the coefficient itself in order to be sure that it was as low as we expected.
+
+```{r, echo=TRUE}
+cols <- data_n %>% dplyr::select(Age, Fare)
+cor(cols, method="spearman")
+```
+
+The result is about 0.135, which is, as expected, extremely low. We can faintly see the shape of somewhat of two typical spearman correlated variables. We can simply conclude that these two variables are not correlated, and thus age couldn't accurately predict fare nor the opposite.
+
+\newpage
+
+### What about older people?\
+
+Maybe if we segregated the age of the passengers before calculating the correlation, we could get a more interesting picture, let's try that out.
+
+### Correlation between Age and Fare for passengers older than 55 years of age\
+
+```{r, echo=TRUE}
+log_data_n = data_n %>% 
+              filter(Age >= 55) %>%
+              mutate(logAge = log(Age), logFare = log(Fare+100))
+ggplot(data=log_data_n, aes(x=logFare, y=logAge)) + 
+    geom_point() +
+    theme(text = element_text(size=18))
+```
+
+```{r, echo=TRUE}
+cols <- log_data_n %>% dplyr::select(logAge, logFare)
+cor(cols, method="spearman")
+```
+
+We stick with our choice of using spearman, but this definitely did not work out for the older passengers.
+
+\newpage
+
+### What about ages between 25th and 75th percentiles?\
+
+### Correlation between Age and Fare for passengers between 20 and 38 years of age\
+
+```{r, echo=TRUE}
+log_data_n = data_n %>% 
+              filter(Age >= 20 & Age <= 38 ) %>%
+              mutate(logAge = log(Age), logFare = log(Fare+100))
+ggplot(data=log_data_n, aes(x=logFare, y=logAge)) + 
+    geom_point() +
+    theme(text = element_text(size=18))
+```
+
+```{r, echo=TRUE}
+cols <- log_data_n %>% dplyr::select(logAge, logFare)
+cor(cols, method="spearman")
+```
+
+A tad bit better but still definitely not a stronger correlation.
+
+\newpage
+
+### What about ages below the 25th percentile?\
+
+### Correlation between Age and Fare for passengers under 20 years of age\
+
+```{r, echo=TRUE}
+log_data_n = data_n %>% 
+              filter(Age < 20 ) %>%
+              mutate(logAge = log(Age), logFare = log(Fare+100))
+ggplot(data=log_data_n, aes(x=logFare, y=logAge)) + 
+    geom_point() +
+    theme(text = element_text(size=18))
+```
+
+```{r, echo=TRUE}
+cols <- log_data_n %>% dplyr::select(logAge, logFare)
+cor(cols, method="spearman")
+```
+
+Interesting!, so this is definitely stronger than our first example. We can say that most young people and kids are probably coming with their parents, therefore likely paying a cheaper ticket.
+
+\newpage
+
+### Performance Analytics plot\
+
+With a performance analytics plot we can see a histogram for each selected variable, a scatter plot with a plotted line through the points and the correlation number. Showing the power of custom R libraries!\
+
+```{r, echo=TRUE,  warning=FALSE, fig.height=3.5}
+pa <- data_n %>% dplyr::select(Age, Fare)
+chart.Correlation(pa, histogram=TRUE, pch=19, method="spearman")
+```
+
+&nbsp;
+
+Interesting!, so this is definitely stronger than our first example. We can say that most young people and kids are probably coming with their parents, therefore likely paying a cheaper ticket.
+
+We can try using the dataset with the log transformations to view the scatter plot a bit less... messy\
+
+```{r, echo=TRUE, warning=FALSE, fig.height=3.5}
+pa <- log_data_n %>% dplyr::select(logAge, logFare)
+chart.Correlation(pa, histogram=TRUE, pch=19, method="spearman")
+```
+
+This didn't quite do much to the scatter plot but did give us a better correlation... suspicious.
+
+\newpage
+
+### \
+
+With a performance analytics plot we can see a histogram for each selected variable, a scatter plot with a plotted line through the points and the correlation number. Showing the power of custom R libraries!\
+
+```{r, echo=TRUE,  warning=FALSE, fig.height=3.5}
+pa <- data_n %>% dplyr::select(Age, Fare)
+chart.Correlation(pa, histogram=TRUE, pch=19, method="spearman")
+```
