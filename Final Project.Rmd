@@ -556,7 +556,7 @@ We can see clearly that the overwhelming majority of passengers embarked the shi
 
 ### Grouping passengers per port of embarkation\
 
-```{r, echo=TRUE,  warning=FALSE, , message=FALSE, fig.height=3.45}
+```{r, echo=TRUE,  warning=FALSE, , message=FALSE, fig.height=3.15}
 # summarizing fare, age by mean
 embarked <- data_n %>% group_by(Embarked) %>% summarize(Fare = mean(Fare), Age = mean(Age)) %>%
  filter(Embarked != '')
@@ -599,14 +599,159 @@ ggplot(pclass, aes(y=Survived, x=Pclass, fill=Pclass)) +
   theme(text = element_text(size=18))
 ```
 
-Figure 20
+Figure 23
 
-In Figure 19 we see the proportion of survivals per class. We notice that 1st class passengers exhibit a nearly 3x higher survival rate than 3rd class passengers. Highlighting that they were of higher priority when it comes to saving their lives. 
+In Figure 23 we see the proportion of survivals per class. We notice that 1st class passengers exhibit a nearly 3x higher survival rate than 3rd class passengers. Highlighting that they were of higher priority when it comes to saving their lives. 
 
 There's probably many reasons as to why this is the case. In the instance that a passenger from first class would hold some kind of high position in a large company at the time, or perhaps hold some kind of political position, these people might be prioritized. 
 
+\newpage
 
+### General passenger survival rate\
 
+```{r, echo=TRUE,  warning=FALSE, message=FALSE, fig.height=4}
+# proportions of survivors
+survived <- data.frame(prop.table(table(data_n$Survived)))
+colnames(survived)[1] <- "survived"
+survived
+
+# plotting bars
+ggplot(survived, aes(x=survived, y=Freq, fill=survived)) +
+ geom_bar(position="dodge", stat="identity") +
+ geom_label(aes(y=Freq, label = scales::percent(round(Freq,4), accuracy=0.01)), 
+             position=position_dodge(width=0.9),
+             show.legend=F)+
+ theme(text = element_text(size=18))
+```
+
+Figure 24\
+
+This variable is binary and expresses whether a passenger died or survived, where 0 = Did not survive and 1 = Survived.
+
+In Figure 24 we can see the general survival rate for passengers. About 60% of passengers did not survive the wreckage and about 40% did. Contrary to a popular belief, we imagine most people might think that nobody survived the wreck, but even us were somewhat surprised to see that nearly half the passengers survived the wreckage.
+
+\newpage
+
+### Grouping passengers by the survival variable\
+
+```{r, echo=TRUE,  warning=FALSE, , message=FALSE, fig.height=3.45}
+survived <- data_n %>% group_by(Survived) %>% summarize(Fare = mean(Fare), Age = mean(Age))
+
+# melt
+survived <- melt(survived, id.vars=c("Survived"), measure.vars=c("Fare","Age")) %>%
+  mutate(variable = as.character(variable), Survived = as.character(Survived))
+survived
+
+# plotting lines for the 3 variables selected
+ggplot(survived, aes(y=value, x=variable, fill=Survived)) + 
+  geom_bar(position="dodge", stat="identity") +
+  theme(text = element_text(size=18))+
+  geom_label(aes(y=value, label = round(value,2), accuracy=0.01),
+             position=position_dodge(width=0.9),
+             show.legend=F)
+```
+
+Figure 25
+
+In Figure 25 we can see that similarly to the port of embarkation variable, the mean age for people who died or survived is quite similar. It does not seem to play a part in whether a passenger survived or died at first glance.
+
+The mean fare, however, seems to be quite different for passengers who survived and died. This matches up well with the survived per class plot presented previously, where we notice that passengers who paid for a higher costing ticket had a significantly higher chance to survive the wreckage. Therefore the average cost of fares is 2.5x higher for passengers who survived.
+
+\newpage
+
+### Proportion of passengers per amount of siblings/spouses\
+
+```{r, echo=TRUE,  warning=FALSE, , message=FALSE, fig.height=4.1}
+# proportions for SibSp
+SibSp <- data.frame(prop.table(table(data_n$SibSp)))
+colnames(SibSp)[1] <- "SibSp"
+SibSp
+
+# plotting bars
+ggplot(SibSp, aes(x=SibSp, y=Freq, fill=SibSp)) +
+ geom_bar(position="dodge", stat="identity") +
+ geom_label(aes(y=Freq, label = scales::percent(round(Freq,4), accuracy=0.01)), 
+             position=position_dodge(width=0.9),
+             show.legend=F)+
+ theme(text = element_text(size=18))
+```
+
+Figure 26
+
+In Figure 26 we can see that the overwhelming majority of passengers, about 2/3 of them did not have any spouses or sibligs/step-siblings on board. Of those who did have at least one, most of them only had one. We could probably assume that most of these with a count of 1 are people traveling with their spouse. However we would have to research each individual aboard the ship.
+
+\newpage
+
+### Proportion of passengers per amount of parents/children\
+
+```{r, echo=TRUE,  warning=FALSE, , message=FALSE, fig.height=4.1}
+# proportions for Parch
+Parch <- data.frame(prop.table(table(data_n$Parch)))
+colnames(Parch)[1] <- "Parch"
+Parch
+
+# plotting bars
+ggplot(Parch, aes(x=Parch, y=Freq, fill=Parch)) +
+ geom_bar(position="dodge", stat="identity") +
+ geom_label(aes(y=Freq, label = scales::percent(round(Freq,4), accuracy=0.01)), 
+             position=position_dodge(width=0.9),
+             show.legend=F)+
+ theme(text = element_text(size=18))
+```
+
+Figure 27\
+
+In Figure 27 we can see that the overwhelming majority of passengers did not have either a parent or a child (son/daughter/stepson/stepdaughter) with them on the ship. Of those that did there's a tight split between 1 and 2, possibly a good chunk of them being children with their parents on board or couples with 1-2 kids on board. The rest 3-6 are a very minor subset of the passengers.
+
+\newpage
+
+### Average amount of sublings/spouses per survival status\
+
+```{r, echo=TRUE,  warning=FALSE, , message=FALSE, fig.height=3.85}
+# summarizing sibsp by mean if sibsp >= 1
+survived <- data_n %>% group_by(Survived) %>% 
+ filter(SibSp >= 1) %>%
+ summarize(SibSp = mean(SibSp)) %>% 
+ mutate(Survived = as.character(Survived))
+head(survived)
+
+# sex groupby survive
+ggplot(survived, aes(y=SibSp, x=Survived, fill=Survived)) + 
+  geom_bar(position="dodge", stat="identity")+
+  theme(text = element_text(size=18))+
+  geom_label(aes(y=SibSp, label = round(SibSp,2)), 
+             position=position_dodge(width=0.9),
+             show.legend=F)
+```
+
+Figure 28\
+
+We thought it would be interesting to see the mean amount of siblings/spouses (as long as there's 1 or more aboard the ship) per survival status. We can see that these amount are quite similar, but interestingly, we see that the people that survived tend to have a lower amount of siblings/spouses, suggesting that perhaps those without a close family member on board had a very slight chance to survive higher than those who didn't. We can't conclusively say so, but we could infer that empirically.
+
+\newpage
+
+### Average amount of parents/children per survival status\
+
+```{r, echo=TRUE,  warning=FALSE, , message=FALSE, fig.height=3.85}
+# summarizing parch by mean if parch >= 1
+survived <- data_n %>% group_by(Survived) %>% 
+ filter(Parch >= 1) %>%
+ summarize(Parch = mean(Parch)) %>% 
+ mutate(Survived = as.character(Survived))
+head(survived)
+
+# sex groupby survive
+ggplot(survived, aes(y=Parch, x=Survived, fill=Survived)) + 
+  geom_bar(position="dodge", stat="identity")+
+  theme(text = element_text(size=18))+
+  geom_label(aes(y=Parch, label = round(Parch,2)), 
+             position=position_dodge(width=0.9),
+             show.legend=F)
+```
+
+Figure 29\
+
+The same story seems to repeat for parents/children but to a much lesser extent. Here there's just no way we can conclusively say that passengers with a parent/children or more had any chance to survive whether they had more or less of such amount of family members on board, but it's somewhat similar to the numbers we saw on sibling/spouse. Where there seems to be a very subtle trend for survivors where they seem to carry less family members on board.
 
 
 
