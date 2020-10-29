@@ -14,10 +14,10 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introduction\
 \
-In this project we will explore the Titanic Passenger’s dataset. We intend to make a surface description of the datasets
-through plots, analysis of such plots and detailed descriptions of our observations relating them. We will also use caret to analyze the relationship of one of our categorical variables in terms of other variables (in our case, mortality of the titanic’s passengers).\
+In this project we will explore the Titanic Passenger's dataset. We intend to make a surface description of the datasets
+through plots, analysis of such plots and detailed descriptions of our observations relating them. We will also use caret to analyze the relationship of one of our categorical variables in terms of other variables (in our case, mortality of the titanic's passengers).\
 
-The project will be divided in two parts: The descriptive analysis and the use of caret to relate the variables. Each part will explore a few key points that we consider quite interesting. We want to create a general idea of the content of the dataset in order to later on effectively know what might have affected the mortality of passengers in the titanic. The teachings from such a tragic event must’ve taught us something right? \
+The project will be divided in two parts: The descriptive analysis and the use of caret to relate the variables. Each part will explore a few key points that we consider quite interesting. We want to create a general idea of the content of the dataset in order to later on effectively know what might have affected the mortality of passengers in the titanic. The teachings from such a tragic event must've taught us something right? \
 
 A few key points to explore will be:
 
@@ -284,6 +284,8 @@ ggplot(data=log_data_n, aes(x=logFare, y=logAge)) +
     theme(text = element_text(size=18))
 ```
 
+Figure 10\
+
 ```{r, echo=TRUE}
 cols <- log_data_n %>% dplyr::select(logAge, logFare)
 cor(cols, method="spearman")
@@ -305,6 +307,8 @@ ggplot(data=log_data_n, aes(x=logFare, y=logAge)) +
     geom_point() +
     theme(text = element_text(size=18))
 ```
+
+Figure 11\
 
 ```{r, echo=TRUE}
 cols <- log_data_n %>% dplyr::select(logAge, logFare)
@@ -328,6 +332,8 @@ ggplot(data=log_data_n, aes(x=logFare, y=logAge)) +
     theme(text = element_text(size=18))
 ```
 
+Figure 12\
+
 ```{r, echo=TRUE}
 cols <- log_data_n %>% dplyr::select(logAge, logFare)
 cor(cols, method="spearman")
@@ -346,26 +352,172 @@ pa <- data_n %>% dplyr::select(Age, Fare)
 chart.Correlation(pa, histogram=TRUE, pch=19, method="spearman")
 ```
 
-&nbsp;
+Figure 13
 
 Interesting!, so this is definitely stronger than our first example. We can say that most young people and kids are probably coming with their parents, therefore likely paying a cheaper ticket.
 
 We can try using the dataset with the log transformations to view the scatter plot a bit less... messy\
 
-```{r, echo=TRUE, warning=FALSE, fig.height=3.5}
+```{r, echo=TRUE, warning=FALSE, fig.height=3.3}
 pa <- log_data_n %>% dplyr::select(logAge, logFare)
 chart.Correlation(pa, histogram=TRUE, pch=19, method="spearman")
 ```
+
+Figure 14
 
 This didn't quite do much to the scatter plot but did give us a better correlation... suspicious.
 
 \newpage
 
-### \
+### Proportions of passengers per sex\
 
-With a performance analytics plot we can see a histogram for each selected variable, a scatter plot with a plotted line through the points and the correlation number. Showing the power of custom R libraries!\
+```{r, echo=TRUE,  warning=FALSE, message=FALSE, fig.height=3.7}
+# proportions for sex
+sex <- data.frame(prop.table(table(data_n$Sex)))
+colnames(sex)[1] <- "sex"
+sex
 
-```{r, echo=TRUE,  warning=FALSE, fig.height=3.5}
-pa <- data_n %>% dplyr::select(Age, Fare)
-chart.Correlation(pa, histogram=TRUE, pch=19, method="spearman")
+# plotting bars
+options(repr.plot.width = 8, repr.plot.height = 8)
+ggplot(sex, aes(x=sex, y=Freq, fill=sex)) +
+ geom_bar(position="dodge", stat="identity") +
+ geom_label(aes(y=Freq, label = scales::percent(round(Freq,4), accuracy=0.01)), 
+             position=position_dodge(width=0.9),
+             show.legend=F)+
+ theme(text = element_text(size=18))
 ```
+
+Figure 15\
+
+We can clearly see that the large majority of patients were male, we nearly twice as many males than females. We could hypothesize that this could be due to the fact that the majority of the crew was make, or maybe females were less likely to risk boarding a cruise, maybe males were more able to pay for the ships given that most females certainly earned less than males in 1912, there could be many reasons for this. The reality is we can't know for sure, but the numbers show an interesting trend.
+
+Let's see what else the sex variable can offer us when grouping.
+
+\newpage
+
+### Grouping passengers by sex\
+
+```{r, echo=TRUE,  warning=FALSE, , message=FALSE, fig.height=3.7}
+# summarizing fare, age by mean
+sex <- data_n %>% group_by(Sex) %>% summarize(Fare = mean(Fare), Age = mean(Age))
+sex
+
+# melt
+sex <- melt(sex, id.vars=c("Sex"), measure.vars=c("Fare","Age")) %>% mutate(variable = as.character(variable))
+
+# plotting lines for the 3 variables selected
+ggplot(sex, aes(y=value, x=variable, fill=Sex)) + 
+  geom_bar(position="dodge", stat="identity") +
+  theme(text = element_text(size=18))+
+  geom_label(aes(y=value, label = round(value,2), accuracy=0.01),
+             position=position_dodge(width=0.9),
+             show.legend=F)
+```
+
+Figure 16
+
+Grouping passengers by sex shows an interesting story.
+
+We can see that females are slightly younger than males, which accurately portrays an interesting reality of our general demography, but specifically the demography of 1912 England, and this is that men used to prefer to marry younger women. This trend seems to remain in the 21st century, but perhaps not as clearly evident as back in the 20th century and before. where this was pretty much the reality in most households.
+
+For some odd reason, females seem to pay significantly more than males to board the ship. And apparently, on average, about twice as much.
+
+\newpage
+
+### Survival rate per sex\
+
+```{r, echo=TRUE,  warning=FALSE, , message=FALSE, fig.height=3.7}
+# summarizing survived by mean
+sex <- data_n %>% group_by(Sex) %>% summarize(Survived = mean(Survived))
+
+head(sex)
+
+# sex groupby survive
+ggplot(sex, aes(y=Survived, x=Sex, fill=Sex)) + 
+  geom_bar(position="dodge", stat="identity")+
+  geom_label(aes(y=Survived, label = scales::percent(round(Survived,4), accuracy=0.01)), 
+             position=position_dodge(width=0.9),
+             show.legend=F)+
+  theme(text = element_text(size=18))
+```
+
+Figure 17\
+
+The survival rate per sex as shown in the barplot of Figure 17, we can notice that 75.48% of females survived while 20.53% of males survived. The larger percentage of females surviving shows the typical idea of "save the women and children" that we hear on films all the time and that we take as an attitude in catastrophic situations, it shows they were the priority and this sample backs that up.
+
+\newpage
+
+### Grouping passengers per class\
+
+```{r, echo=TRUE,  warning=FALSE, , message=FALSE, fig.height=3.45}
+# summarizing fare, age by mean
+pclass <- data_n %>% group_by(Pclass) %>% summarize(Fare = mean(Fare), Age = mean(Age))
+
+# melt
+pclass <- melt(pclass, id.vars=c("Pclass"), measure.vars=c("Fare","Age")) %>%
+  mutate(variable = as.character(variable), Pclass = as.character(Pclass))
+head(pclass)
+
+# plotting lines for the 3 variables selected
+ggplot(pclass, aes(y=value, x=variable, fill=Pclass)) + 
+  geom_bar(position="dodge", stat="identity") +
+  theme(text = element_text(size=18))+
+  geom_label(aes(y=value, label = round(value,2), accuracy=0.01),
+             position=position_dodge(width=0.9),
+             show.legend=F)
+```
+
+Figure 18
+
+Here in Figure 18 we can see an interesting pattern looking at Fare and Age per passenger class. We see that the average fare for 1st class is about 4 times larger than the average fare for 2nd class and almost 7 times the average fare for a 3rd class ticket.
+
+A similar story happens with age, we see that the mean age per class relates similarly to the Fare. Older people seem to be more willing to pay for more expensive tickets, probably because they have either a higher income or they're able to afford higher priced tickets.
+
+\newpage
+
+### Survival rate per class\
+
+```{r, echo=TRUE,  warning=FALSE, , message=FALSE, fig.height=3.45}
+# summarizing survived by mean
+pclass <- data_n %>% group_by(Pclass) %>% summarize(Survived = mean(Survived)) %>% mutate(Pclass = as.character(Pclass))
+head(pclass)
+
+# sex groupby survive
+ggplot(pclass, aes(y=Survived, x=Pclass, fill=Pclass)) + 
+  geom_bar(position="dodge", stat="identity")+
+  geom_label(aes(y=Survived, label = scales::percent(round(Survived,4), accuracy=0.01)), 
+             position=position_dodge(width=0.9),
+             show.legend=F)+
+  theme(text = element_text(size=18))
+```
+
+Figure 19
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
