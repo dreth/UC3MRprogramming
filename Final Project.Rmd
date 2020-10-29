@@ -27,12 +27,6 @@ A few key points to explore will be:
 
 Among other things, which hopefully shall paint an accurate full picture when it comes to the risk of death in this tragic event. \
 
-### Run this cell if you do NOT have the libraries we'll use for this project
-
-```{r, echo=TRUE, results='hide'}
-
-```
-
 ### First off let's load the libraries we'll use during this project
 
 ```{r, echo=TRUE, results='hide', warning=FALSE, message=FALSE}
@@ -45,7 +39,91 @@ library(vcd)
 library(EnvStats)
 library(scales)
 ```
+## How does the data look?\
 
-## Descriptive analysis
+### Importing the data\
 
-### Our variables
+```{r, echo=TRUE, results='hide', warning=FALSE, message=FALSE}
+data = read.csv('data/titanic.csv')
+```
+
+### Dataset head\
+
+```{r, echo=TRUE}
+head(data)
+```
+
+### Ommitting nans on a separate dataset
+
+The purpose of this is to have a dataset with all the content which we will use for predictions, and a dataset with all the data, except nan values. The latter will be used exclusively for plotting and for descriptive analysis.\
+
+```{r, echo=TRUE}
+data_n <- na.omit(data)
+```
+
+\newpage
+
+## Variables\
+
+#### ID:
+
+- PassengerId: A unique identifying number for every passenger listed in an SQL-like fashion
+
+#### Other identifying variables:
+
+- Name: Name of the passenger
+- Ticket: Ticket number/code for the passenger
+- Cabin: Cabin the passenger boarded the cruise in
+
+#### Continuous:
+
+- Fare: Amount paid by the passenger to board the cruise
+- Age: Age of the passenger during the cruise boarding in years
+
+#### Discrete:
+
+- SibSp: This is the total amount of siblings/step-siblings and spouses that a passenger has
+- Sex: the passenger's sex
+- Survived: a boolean variable that describes whether the passenger survived or not
+- Pclass: a variable that describes the class in which the passenger sailed aboard the cruise ship (1st,2nd,3rd class)
+- parch: This is the total amount of parents (mother, father) or children (son, daughter, step-son/daughter) that a given passenger has
+
+\newpage
+
+## Descriptive Analysis\
+
+### Histogram for Age
+
+```{r, echo=TRUE}
+hist(data$Age)
+```
+Figure 1\
+
+In Figure 1 we can see the age distribution shows the mean age between 25-35 years old. We can see there is a significantly larger right tail than left tail. With a large amount of young children, all, more than likely related to other passengers (their parents). The plot resembles a normal distribution in its concentration of individuals around the mean.
+
+There are very few old people, which we could speculate could be due to the significantly lower life expectancy of back then (between 51 and 55 years old in 1910-1920 UK), or due to the fact that maybe a trip aboard the ship might have been aimed to families. Either way, there aren’t many people above 70 (<5) and none above 80.
+
+\newpage
+
+### Histogram for Fare
+
+```{r, echo=TRUE}
+hist(data$Fare)
+```
+Figure 2\
+
+According to Figure 2 on our second continuous variable (Fare), we notice a significantly different 
+situation Vs Age. We have a massively long left tail, as a result of some extremely highly priced tickets payed by a few passengers. Which shows a large and seemingly empty space between fares priced around 250-300 GBP and about 500+ GBP, with little to no tickets payed, showing evidence that some of the tickets, while expensive and very rare among all the individuals (250-300) are still far from the maximum Fare payed (500+). We can clearly see the data is extremely right-skewed.
+
+Extremely expensive tickets, while interesting, are also quite rare. We see that almost all the data concentrates around the 0-100 GBP cost. None being actually free, but yes between 0-1 GBP. We could theorize such cheap tickets probably belonged to children, while most normal tickets were above 20 GBP.
+
+For reference, the ticket prices to board the titanic were the following (in 1912 GBP):
+
+- First Class (parlor suite) — £870
+- First Class (berth)— £30
+- Second Class — £12
+- Third Class — £3 to £8
+
+The conversion rate for £1 (in 1912) would be £115 (in 2019), which shows that even the cheapest tickets (while maybe relatively cheap to board a transatlantic cruise) were still relatively expensive by 1912 standards.
+
+### Fitting distributions to data:
