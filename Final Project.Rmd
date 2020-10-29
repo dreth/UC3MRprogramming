@@ -447,6 +447,31 @@ The survival rate per sex as shown in the barplot of Figure 17, we can notice th
 
 \newpage
 
+### Proportions of passengers per class\
+
+```{r, echo=TRUE,  warning=FALSE, message=FALSE, fig.height=4}
+# proportions for pclass
+Pclass <- data.frame(prop.table(table(data_n$Pclass)))
+colnames(Pclass)[1] <- "Pclass"
+Pclass
+
+# plotting bars
+ggplot(Pclass, aes(x=Pclass, y=Freq, fill=Pclass)) +
+ geom_bar(position="dodge", stat="identity") +
+ geom_label(aes(y=Freq, label = scales::percent(round(Freq,4), accuracy=0.01)), 
+             position=position_dodge(width=0.9),
+             show.legend=F)+
+ theme(text = element_text(size=18))
+```
+
+Figure 18\
+
+We can clearly see that the large majority of patients were cruising the ship in 3rd class. Passengers cruising in 3rd class make up about half the passengers on the ship, while there's a very similar amount of passengers in 1st and 2nd class. 2nd class seems to have been the least popular class in which to cruise the ship.
+
+Important to note is that in 1st class there were not just passengers for normal 1st class but also for higher "tiers" of first class depending on their position on the boat and other metrics like suite quality.
+
+\newpage
+
 ### Grouping passengers per class\
 
 ```{r, echo=TRUE,  warning=FALSE, , message=FALSE, fig.height=3.45}
@@ -467,9 +492,9 @@ ggplot(pclass, aes(y=value, x=variable, fill=Pclass)) +
              show.legend=F)
 ```
 
-Figure 18
+Figure 19
 
-Here in Figure 18 we can see an interesting pattern looking at Fare and Age per passenger class. We see that the average fare for 1st class is about 4 times larger than the average fare for 2nd class and almost 7 times the average fare for a 3rd class ticket.
+Here in Figure 19 we can see an interesting pattern looking at Fare and Age per passenger class. We see that the average fare for 1st class is about 4 times larger than the average fare for 2nd class and almost 7 times the average fare for a 3rd class ticket.
 
 A similar story happens with age, we see that the mean age per class relates similarly to the Fare. Older people seem to be more willing to pay for more expensive tickets, probably because they have either a higher income or they're able to afford higher priced tickets.
 
@@ -477,7 +502,7 @@ A similar story happens with age, we see that the mean age per class relates sim
 
 ### Survival rate per class\
 
-```{r, echo=TRUE,  warning=FALSE, , message=FALSE, fig.height=3.45}
+```{r, echo=TRUE,  warning=FALSE, , message=FALSE, fig.height=4}
 # summarizing survived by mean
 pclass <- data_n %>% group_by(Pclass) %>% summarize(Survived = mean(Survived)) %>% mutate(Pclass = as.character(Pclass))
 head(pclass)
@@ -491,10 +516,94 @@ ggplot(pclass, aes(y=Survived, x=Pclass, fill=Pclass)) +
   theme(text = element_text(size=18))
 ```
 
-Figure 19
+Figure 20
 
+In Figure 20 we see the proportion of survivals per class. We notice that 1st class passengers exhibit a nearly 3x higher survival rate than 3rd class passengers. Highlighting that they were of higher priority when it comes to saving their lives. 
 
+There's probably many reasons as to why this is the case. In the instance that a passenger from first class would hold some kind of high position in a large company at the time, or perhaps hold some kind of political position, these people might be prioritized. 
 
+\newpage
+
+### Proportions of passengers per port of embarkation\
+
+```{r, echo=TRUE,  warning=FALSE, message=FALSE, fig.height=3.7}
+# proportions for Embarked
+df <- data_n %>% filter(Embarked != '')
+Embarked <- data.frame(prop.table(table(df$Embarked)))
+colnames(Embarked)[1] <- "Embarked"
+Embarked
+
+# plotting bars
+ggplot(Embarked, aes(x=Embarked, y=Freq, fill=Embarked)) +
+ geom_bar(position="dodge", stat="identity") +
+ geom_label(aes(y=Freq, label = scales::percent(round(Freq,4), accuracy=0.01)), 
+             position=position_dodge(width=0.9),
+             show.legend=F)+
+ theme(text = element_text(size=18))
+```
+
+Figure 21\
+
+In Figure 21 we see the proportion of passengers embarking from each port of embarkation. Each letter stands for a port:
+
+- C = Cherbourg
+- Q = Queenstown
+- S = Southampton
+
+We can see clearly that the overwhelming majority of passengers embarked the ship through the Southampton port (77.81%), the majority of the rest through the Cherbourg port and only a few through Queenstown port.
+
+\newpage
+
+### Grouping passengers per port of embarkation\
+
+```{r, echo=TRUE,  warning=FALSE, , message=FALSE, fig.height=3.45}
+# summarizing fare, age by mean
+embarked <- data_n %>% group_by(Embarked) %>% summarize(Fare = mean(Fare), Age = mean(Age)) %>%
+ filter(Embarked != '')
+
+# melt
+embarked <- melt(embarked, id.vars=c("Embarked"), measure.vars=c("Fare","Age")) %>%
+  mutate(variable = as.character(variable))
+embarked
+
+# plotting lines for the 3 variables selected
+ggplot(embarked, aes(y=value, x=variable, fill=Embarked)) + 
+  geom_bar(position="dodge", stat="identity") +
+  theme(text = element_text(size=18))+
+  geom_label(aes(y=value, label = round(value,2), accuracy=0.01),
+             position=position_dodge(width=0.9),
+             show.legend=F)
+```
+
+Figure 22
+
+In Figure 22 we see that age doesn't quite play a part in which port of embarkation the passenger used to board the ship. We could say that very very slightly older people seem to board through the Cherbourg port given that older people are also willing to pay more expensive fares and Cherbourg is also the port of embarkation where higher paying passengers boarded the ship, but this might be a stretch.
+
+However we can clearly see that passengers boarding through the Cherbourg port tend to pay higher fares. the other ports seem to be pretty even, with the Queenstown port boarding passengers with overall lower cost tickets.
+
+\newpage
+
+### Survival rate per class\
+
+```{r, echo=TRUE,  warning=FALSE, , message=FALSE, fig.height=4}
+# summarizing survived by mean
+pclass <- data_n %>% group_by(Pclass) %>% summarize(Survived = mean(Survived)) %>% mutate(Pclass = as.character(Pclass))
+head(pclass)
+
+# sex groupby survive
+ggplot(pclass, aes(y=Survived, x=Pclass, fill=Pclass)) + 
+  geom_bar(position="dodge", stat="identity")+
+  geom_label(aes(y=Survived, label = scales::percent(round(Survived,4), accuracy=0.01)), 
+             position=position_dodge(width=0.9),
+             show.legend=F)+
+  theme(text = element_text(size=18))
+```
+
+Figure 20
+
+In Figure 19 we see the proportion of survivals per class. We notice that 1st class passengers exhibit a nearly 3x higher survival rate than 3rd class passengers. Highlighting that they were of higher priority when it comes to saving their lives. 
+
+There's probably many reasons as to why this is the case. In the instance that a passenger from first class would hold some kind of high position in a large company at the time, or perhaps hold some kind of political position, these people might be prioritized. 
 
 
 
