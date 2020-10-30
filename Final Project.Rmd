@@ -22,8 +22,10 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ![](./img/download.jpeg)
 
-## Introduction\
-\
+## Introduction
+
+&nbsp;
+
 In this project we will explore the Titanic Passenger's dataset. We intend to make a surface description of the dataset
 through plots, analysis of such plots and detailed descriptions of our observations relating them. We will also use caret to analyze the relationship of one of our categorical variables in terms of other variables (in our case, mortality of the titanic's passengers).\
 
@@ -53,15 +55,17 @@ library(EnvStats)
 library(scales)
 ```
 
-## How does the data look like?\
+## How does the data look like?
 
-### Importing the data\
+&nbsp;
+
+### Importing the data
 
 ```{r, echo=TRUE, results='hide', warning=FALSE, message=FALSE}
 data = read.csv('data/titanic.csv')
 ```
 
-### Dataset head\
+### Dataset head
 
 ```{r, echo=TRUE}
 head(data)
@@ -77,7 +81,10 @@ data_n <- na.omit(data)
 
 \newpage
 
-## Variables\
+## Variables
+
+&nbsp;
+
 
 #### ID:
 
@@ -104,9 +111,15 @@ data_n <- na.omit(data)
 
 \newpage
 
-# Part 1: Descriptive Analysis\
+# Part 1: Descriptive Analysis
 
-## Histogram for Age\
+&nbsp;
+
+
+## Histogram for Age
+
+&nbsp;
+
 
 ```{r, echo=TRUE}
 hist(data$Age)
@@ -120,7 +133,9 @@ There are very few old people, which we could speculate could be due to the sign
 
 \newpage
 
-## Histogram for Fare\
+## Histogram for Fare
+
+&nbsp;
 
 ```{r, echo=TRUE}
 hist(data$Fare)
@@ -144,7 +159,9 @@ The conversion rate for £1 (in 1912) would be £115 (in 2019), which shows that
 
 \newpage
 
-## Fitting the normal distribution to Age\
+## Fitting the normal distribution to Age
+
+&nbsp;
 
 ```{r, echo=TRUE}
 plot(summary(fitdist(data_n$Age,"norm")))
@@ -160,7 +177,9 @@ An interesting thing to think about would be to, with proper statistical analysi
 
 \newpage
 
-## Fitting a gamma distribution to Fare\
+## Fitting a gamma distribution to Fare
+
+&nbsp;
 
 ```{r, echo=TRUE}
 plot(summary(fitdist(data_n$Fare+1,"gamma")))
@@ -178,7 +197,9 @@ Boarding the ship wasn't exactly cheap, but we know for a fact that luxury ticke
 
 \newpage
 
-## Boxplot for Age\
+## Boxplot for Age
+
+&nbsp;
 
 ```{r, echo=TRUE}
 five <- data.frame(x=rep(1,5), five=fivenum(data_n$Age))
@@ -203,7 +224,10 @@ The relative fragile state of old people during these times, the fact that they 
 
 \newpage
 
-## Boxplot for Fare\
+## Boxplot for Fare
+
+&nbsp;
+
 
 ```{r, echo=TRUE, results='hide', warning=FALSE, message=FALSE}
 five <- data.frame(x=rep(1,5), five=fivenum(data_n$Fare))
@@ -226,7 +250,10 @@ Our minimum value is 0, which might represent children who probably didn't pay a
 
 \newpage
 
-## Quantiles for Age\
+## Quantiles for Age
+
+&nbsp;
+
 
 ```{r, echo=TRUE, results='hide', warning=FALSE, message=FALSE, fig.width=7, fig.height=3.5}
 plot(quantile(data_n$Age))
@@ -236,7 +263,10 @@ Figure 7\
 
 In the following plot we can see the quantiles more clearly for Age.\
 
-## Quantiles for Fare\
+## Quantiles for Fare
+
+&nbsp;
+
 
 ```{r, echo=TRUE, results='hide', warning=FALSE, message=FALSE, fig.width=7, fig.height=3.5}
 plot(quantile(data_n$Fare))
@@ -250,7 +280,10 @@ Both these plots clearly show the extreme nature of maximum values, especially f
 
 \newpage
 
-## Correlation between Age and Fare\
+## Correlation between Age and Fare
+
+&nbsp;
+
 
 ```{r, echo=TRUE}
 log_data_n = data_n %>% mutate(logAge = log(Age), logFare = log(Fare+100))
@@ -350,7 +383,7 @@ Interesting!, so this is definitely stronger than our first example. We can say 
 
 \newpage
 
-## Performance Analytics plot\
+## Performance Analytics plots
 
 With a performance analytics plot we can see a histogram for each selected variable, a scatter plot with a plotted line through the points and the correlation number. Showing the power of custom R libraries!\
 
@@ -376,7 +409,10 @@ This didn't quite do much to the scatter plot but did give us a better correlati
 
 \newpage
 
-## Proportions of passengers per sex\
+## Proportions of passengers per sex
+
+&nbsp;
+
 
 ```{r, echo=TRUE,  warning=FALSE, message=FALSE, fig.height=3.7}
 # proportions for sex
@@ -402,7 +438,9 @@ Let's see what else the sex variable can offer us when grouping.
 
 \newpage
 
-## Grouping passengers by sex\
+## Grouping passengers by sex
+
+&nbsp;
 
 ```{r, echo=TRUE,  warning=FALSE, , message=FALSE, fig.height=3.7}
 # summarizing fare, age by mean
@@ -431,7 +469,9 @@ For some odd reason, females seem to pay significantly more than males to board 
 
 \newpage
 
-## Survival rate per sex\
+## Survival rate per sex
+
+&nbsp;
 
 ```{r, echo=TRUE,  warning=FALSE, , message=FALSE, fig.height=3.7}
 # summarizing survived by mean
@@ -454,7 +494,9 @@ The survival rate per sex as shown in the barplot of Figure 17, we can notice th
 
 \newpage
 
-## Proportions of passengers per class\
+## Proportions of passengers per class
+
+&nbsp;
 
 ```{r, echo=TRUE,  warning=FALSE, message=FALSE, fig.height=4}
 # proportions for pclass
@@ -479,7 +521,9 @@ Important to note is that in 1st class there were not just passengers for normal
 
 \newpage
 
-## Grouping passengers per class\
+## Grouping passengers per class
+
+&nbsp;
 
 ```{r, echo=TRUE,  warning=FALSE, , message=FALSE, fig.height=3.45}
 # summarizing fare, age by mean
@@ -507,7 +551,9 @@ A similar story happens with age, we see that the mean age per class relates sim
 
 \newpage
 
-## Survival rate per class\
+## Survival rate per class
+
+&nbsp;
 
 ```{r, echo=TRUE,  warning=FALSE, , message=FALSE, fig.height=4}
 # summarizing survived by mean
@@ -531,7 +577,9 @@ There's probably many reasons as to why this is the case. In the instance that a
 
 \newpage
 
-## Proportions of passengers per port of embarkation\
+## Proportions of passengers per port of embarkation
+
+&nbsp;
 
 ```{r, echo=TRUE,  warning=FALSE, message=FALSE, fig.height=3.7}
 # proportions for Embarked
@@ -561,7 +609,9 @@ We can see clearly that the overwhelming majority of passengers embarked the shi
 
 \newpage
 
-## Grouping passengers per port of embarkation\
+## Grouping passengers per port of embarkation
+
+&nbsp;
 
 ```{r, echo=TRUE,  warning=FALSE, , message=FALSE, fig.height=3.15}
 # summarizing fare, age by mean
@@ -590,7 +640,9 @@ However we can clearly see that passengers boarding through the Cherbourg port t
 
 \newpage
 
-## Survival rate per class\
+## Survival rate per class
+
+&nbsp;
 
 ```{r, echo=TRUE,  warning=FALSE, , message=FALSE, fig.height=4}
 # summarizing survived by mean
@@ -614,7 +666,9 @@ There's probably many reasons as to why this is the case. In the instance that a
 
 \newpage
 
-## General passenger survival rate\
+## General passenger survival rate
+
+&nbsp;
 
 ```{r, echo=TRUE,  warning=FALSE, message=FALSE, fig.height=4}
 # proportions of survivors
@@ -639,7 +693,9 @@ In Figure 24 we can see the general survival rate for passengers. About 60% of p
 
 \newpage
 
-## Grouping passengers by the survival variable\
+## Grouping passengers by the survival variable
+
+&nbsp;
 
 ```{r, echo=TRUE,  warning=FALSE, , message=FALSE, fig.height=3.45}
 survived <- data_n %>% group_by(Survived) %>% summarize(Fare = mean(Fare), Age = mean(Age))
@@ -666,7 +722,9 @@ The mean fare, however, seems to be quite different for passengers who survived 
 
 \newpage
 
-## Proportion of passengers per amount of siblings/spouses\
+## Proportion of passengers per amount of siblings/spouses
+
+&nbsp;
 
 ```{r, echo=TRUE,  warning=FALSE, , message=FALSE, fig.height=4.1}
 # proportions for SibSp
@@ -689,7 +747,9 @@ In Figure 26 we can see that the overwhelming majority of passengers, about 2/3 
 
 \newpage
 
-## Proportion of passengers per amount of parents/children\
+## Proportion of passengers per amount of parents/children
+
+&nbsp;
 
 ```{r, echo=TRUE,  warning=FALSE, , message=FALSE, fig.height=4.1}
 # proportions for Parch
@@ -712,7 +772,9 @@ In Figure 27 we can see that the overwhelming majority of passengers did not hav
 
 \newpage
 
-## Average amount of sublings/spouses per survival status\
+## Average amount of sublings/spouses per survival status
+
+&nbsp;
 
 ```{r, echo=TRUE,  warning=FALSE, , message=FALSE, fig.height=3.85}
 # summarizing sibsp by mean if sibsp >= 1
@@ -737,7 +799,9 @@ We thought it would be interesting to see the mean amount of siblings/spouses (a
 
 \newpage
 
-## Average amount of parents/children per survival status\
+## Average amount of parents/children per survival status
+
+&nbsp;
 
 ```{r, echo=TRUE,  warning=FALSE, , message=FALSE, fig.height=3.85}
 # summarizing parch by mean if parch >= 1
@@ -774,7 +838,9 @@ In order to this part of the project we are going to load the packages that we a
 pacman::p_load(VIM,caret,fastDummies,dplyr,RANN,MLeval,caretEnsemble,randomForest)
 ```
 
-## Preprocessing\
+## Preprocessing
+
+&nbsp;
 
 First of all, we are going to load the dataset:
 
@@ -893,7 +959,9 @@ Looking to the results we can observed that the best results are obtained with 9
 
 \newpage
 
-## Training and Tuning models.\
+## Training and Tuning models.
+
+&nbsp;
 
 In this section, we will use different machine learning techniques in order to train our model and then, predict in test dataset.\
 
@@ -953,15 +1021,33 @@ ROC curves are a graphical plot that illustrate the diagnostic ability of a bina
 
 ```{r, echo=TRUE, warning=FALSE}
 evalm(train_mars,showplots = FALSE,title = "MARS")$roc
+```
 
+Figure 30
+
+```{r, echo=TRUE, warning=FALSE}
 evalm(train_rf,showplots = FALSE,title = "Random Forests")$roc
+```
 
+Figure 31
+
+```{r, echo=TRUE, warning=FALSE}
 evalm(train_svmRadial,showplots = FALSE,title = "SVM")$roc
+```
 
+Figure 32
+
+```{r, echo=TRUE, warning=FALSE}
 evalm(train_ada,showplots = FALSE,title = "AdaBoost")$roc
+```
 
+Figure 33
+
+```{r, echo=TRUE, warning=FALSE}
 evalm(train_xgb,showplots = FALSE,title = "xgbDart")$roc
 ```
+
+Figure 34
 
 Looking to the curves, we can observe how the worse methods are **SVM** and **MARS**, and the rest of method obtain very similar results, being **Random Forests** and **xgbDART** the best, having an area of 0.92.\
 
@@ -988,11 +1074,15 @@ p_xgb=predict(train_xgb,test)
 confusionMatrix(reference=test$Survived,data=p_xgb,mode="everything",positive = "YES")
 ```
 
+&nbsp;
+
 Firstly, we can assure that the methods with the worst results are the one with the worst ROC curves, **MARS** and **SVM**. However, **xgbDART** does not obtain the results we could expect from it, it is quite a rare situation because we do not have overfitting for sure, as this method contains several dropouts. In fact, the best two methods are **Random Forests** and **AdaBoost**, both having and outstanding performance in specificity values. In addition, as we have a balanced dataset, we can look to the accuracy as a good estimator of the performance of the model.\
 
 \newpage
 
-## Ensembling model\
+## Ensembling model
+
+&nbsp;
 
 In statistics and machine learning, ensemble methods use multiple learning algorithms to obtain better predictive performance than could be obtained from any of the constituent learning algorithms alone. Ensembles combine multiple hypotheses to form a better hypothesis. The term ensemble is usually reserved for methods that generate multiple hypotheses using the same base learner.\
 
@@ -1024,7 +1114,9 @@ Looking to the results, we could think at first glance that this model is worst 
 
 \newpage
 
-# Conclusion\
+# Conclusion
+
+&nbsp;
 
 In this part of the project we have learned how to do machine learning algorithms, and prepare our data in order to obtain the best results we can.\
 

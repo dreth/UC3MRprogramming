@@ -1,0 +1,74 @@
+\documentclass[a4paper,12pt]{article}
+%%\documentclass[a4paper,12pt]{book}
+\usepackage{latexsym,amssymb,amsmath}
+\usepackage[english]{babel}
+%% \usepackage[spanish]{babel}
+\usepackage[latin1]{inputenc}
+\usepackage[pdfborder={0 0 0}]{hyperref}
+% %\usepackage{tikz}
+\usepackage{graphicx}
+\usepackage[pdftex]{color}
+
+
+\usepackage{float} % Para obligar a poner las gráficas donde quiero yo
+
+\usepackage{microtype}
+\DisableLigatures{encoding = *, family = * }
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhead{} % clear all header fields
+\fancyhead[L,RO]{\rightmark}   % current section name printed like "1.6. THIS IS THE SECTION TITLE", in "outer" position of header line
+\renewcommand{\headrulewidth}{0pt} % no line in header area
+\fancyfoot{} % clear all footer fields
+\fancyfoot[L,RO]{\thepage}           % page number in "outer" position of footer line
+\fancyfoot[R,LO]{Daniel Alonso \& Ander Iturburu - Titanic Sinking Report} % other info in "inner" position of footer line
+
+\newcommand{\erre}{\mathbb R}
+\newcommand{\CC}{\mathbb C}
+\newcommand{\zzeta}{\mathbb Z}
+\newcommand{\ii}{\mathbb i}
+
+%%\renewcommand{\chaptername}{Computer Practise}
+
+%%\pagestyle{headings}
+
+%\topmargin-0.3cm
+
+\oddsidemargin 0.1cm
+
+\evensidemargin 0.1cm
+
+\textwidth 16cm
+
+\textheight 23.4cm
+%\hoffset=-.6cm 
+
+%\voffset= -1.cm
+
+%%\def\NoBlackBoxes{\global\overfullrule0pt}
+%%\NoBlackBoxes
+
+
+\usepackage{cite}
+\usepackage{indentfirst} %no es lo habitual en inglés poner indent en el primer parrafo!! http://kb.mit.edu/confluence/pages/viewpage.action?pageId=3907353 
+
+\begin{document}
+	
+		\begin{titlepage}
+		\begin{center}
+		\textbf{\LARGE The Titanic Disaster}\\[0.5 cm]
+		\textbf{\LARGE Programming in R}\\[5 cm]
+		%Foto del titanic o así
+        \textbf{\large Daniel Alonso \& Ander Iturburu}\\[0.1cm]
+        \textbf{\large Master in Statistics for Data Science}\\[0.1 cm]
+        \textbf{\large Universidad Carlos III de Madrid}\\[1 cm]
+        \begin{figure}[H]
+		    \centering
+			\scalebox{0.25}{\includegraphics{../img/UC3M_0.jpg}}
+		\end{figure}
+		\textbf{Academic Year 2020/2021}    
+		\end{center}
+	    \end{titlepage} 
+
+    \end{document}
