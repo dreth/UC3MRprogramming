@@ -867,6 +867,8 @@ x_train=train[,(2:10)]
 y_train=train$Survived
 ```
 
+\newpage
+
 ## Analysis of the predictor variables
 
 ### Recursive feature elimination\
@@ -889,9 +891,11 @@ lmProfile
 
 Looking to the results we can observed that the best results are obtained with 9 variables, but the rfe() function returns us that the best option is to select only 5 variables. However, as we have a small sample for ML problem, we will use all the variables in order to improve our prediction. In addition, as the sample is relatively small, selecting all the variables will not have a real impact on the execution time.\
 
-## Training and Tuning models.
+\newpage
 
-In this section, we will use different machine learning techniques in order to train our model and then, predict in test dataset.
+## Training and Tuning models.\
+
+In this section, we will use different machine learning techniques in order to train our model and then, predict in test dataset.\
 
 For all the models that we will apply in this section, we will use the repeated cross validation with 5 repetitions in order to fit our model as precisely as possible.\
 
@@ -961,6 +965,8 @@ evalm(train_xgb,showplots = FALSE,title = "xgbDart")$roc
 
 Looking to the curves, we can observe how the worse methods are **SVM** and **MARS**, and the rest of method obtain very similar results, being **Random Forests** and **xgbDART** the best, having an area of 0.92.\
 
+\newpage
+
 ### Prediction and Confusion matrices\
 
 We are going to predict the test results using the techniques below and will calculate the confusion matrices and some statistics. Furthermore, we are going to interpret the results obtained.\
@@ -983,6 +989,8 @@ confusionMatrix(reference=test$Survived,data=p_xgb,mode="everything",positive = 
 ```
 
 Firstly, we can assure that the methods with the worst results are the one with the worst ROC curves, **MARS** and **SVM**. However, **xgbDART** does not obtain the results we could expect from it, it is quite a rare situation because we do not have overfitting for sure, as this method contains several dropouts. In fact, the best two methods are **Random Forests** and **AdaBoost**, both having and outstanding performance in specificity values. In addition, as we have a balanced dataset, we can look to the accuracy as a good estimator of the performance of the model.\
+
+\newpage
 
 ## Ensembling model\
 
@@ -1013,6 +1021,8 @@ confusionMatrix(reference=test$Survived,data=p_com,mode="everything",positive = 
 ```
 
 Looking to the results, we could think at first glance that this model is worst than, for instance, **adaBoost**, as we see that the accuracy is smaller. That is a fact, but we must gave into account that this model is a better model overall, even if it does not get the best accuracy value.\
+
+\newpage
 
 # Conclusion\
 
