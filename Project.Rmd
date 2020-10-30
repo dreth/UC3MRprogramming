@@ -1,0 +1,219 @@
+---
+title: "R project"
+author: "Daniel Alonso & Ander Iturburu"
+date: "28/10/2020"
+output:
+  pdf_document: default
+  html_document: 
+    toc: true
+    toc_depth: 2
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Part 2: Caret package
+Caret Package is a comprehensive framework for building machine learning models in R. In this part we are going to use the same dataset we used in the previous part. Firstly, we are going to preprocess the dataset and will manage the NAs. Secondly, we are going to create dummy variables for the categorical variables. Thirdly, we are going create our test and train subsets. Fourthly, we are going to train different machine learning based models and we will compare them. Fifthly, we are going to use that models with our test set and we will how they perform. Lastly, we are going to ensemble that models and we will see their performance in case of we apply a Generalized Linear Model (GLM) with all of them. 
+
+The main aim of this part is to predict whether a passenger survived in the Titanic sinking, in order to do this task, we are going to use different information about the passengers and we will try to create a model which predicts as precisely as possible the survival of the passengers.
+
+In order to this part of the project we are going to load the packages that we are going to use:
+
+```{r. echo=TRUE}
+pacman::p_load(VIM,caret,fastDummies,dplyr,RANN,MLeval,caretEnsemble,randomForest)
+```
+## Preprocessing
+First of all, we are going to load the dataset:
+```{r. echo=TRUE}
+df=read.csv("C:/Users/ander/OneDrive/Escritorio/Master/Programming/titanic.csv",
+            na.strings = c("",NA))
+g=read.csv("C:/Users/ander/OneDrive/Escritorio/Master/Programming/gender_submission.csv",
+           na.strings = c("",NA))
+for (i in g$PassengerId[1]:g$PassengerId[length(g$PassengerId)]){
+  df$Survived[i]=g$Survived[i-891]
+}
+```
+Let us see the structure of our dataset:
+```{r. echo=TRUE}
+head(df)
+```
+### Deleting variables and setting variable types.
+In order to predict we are going to get rid of the variables that we are going to use because they do not give us a really useful information about the variable to predict. We are going to delete *Name*, *SibSp*, *Parch*, *Ticket* and *Cabin*.
+```{r. echo=TRUE}
+df=df[,-(4)]
+df=df[,-(6:8)]
+df=df[,-(7)]
+```
+Our dataset has some categorical variables that are not structured that should be and we have to change their type.
+```{r. echo=TRUE}
+str(df)
+```
+As it can be observed, *PClass* and *Survived* are categorized as numerical variables but they are really categorical variables. Furthermore, *Sex* variable will be converted to binary variable and then we will factorize it.
+```{r. echo=TRUE}
+df$Pclass=as.character(df$Pclass)
+df$Sex<-replace(df$Sex,df$Sex=='male',0)
+df$Sex<-replace(df$Sex,df$Sex=='female',1)
+df$Survived<-replace(df$Survived,df$Survived==1,'YES')
+df$Survived<-replace(df$Survived,df$Survived==0,'NO')
+df$Survived=as.factor(df$Survived)
+df$Sex=as.factor(df$Sex)
+
+str(df)
+```
+### Handling with NAs
+As it can be observed we have some Nas in our dataset and we cannot use them. Due to that fact, we have to convert that NAs to some values and in order to do that, we are going to predict that variable using k-nearest neighbors (knn) algorithm. This algorithm predicts the value of NAs, in the case of a continuous variable, the algorithm selects the k-nearest neighbors with euclidean distance and takes the median; otherwise, if it is a categorical variable it takes the mode of that k-nearest neighbors. In our case, we have applied this algorithm for *Age*, *Embarked* and *Fare* continuous variables.
+```{r. echo=TRUE}
+df=kNN(df,variable=c("Embarked","Age","Fare"))
+df=df[,-(8:10)]
+anyNA(df)
+```
+We can now observe how we do not have any missing value.
+
+### Creating Dummy variables
+Dummy variables, also known as One Hot Encoding, is a tool for converting categorical variables into numeric in order for it to be used by the machine learning algorithms. In addition, we must have into account that just replacing the categories with a number may not be meaningful especially if there is no intrinsic ordering amongst the categories. So, the thing that we have to do is create the categorical variable into so many binary variables as the variable has. 
+
+We will do this process in *Embarked* and *PClass* categorical variables. 
+```{r. echo=TRUE}
+df=dummy_cols(df,select_columns = c('Pclass','Embarked'))
+df=df[,-c(3,7)]
+```
+Once we have created the dummy variables of them, we can delete the original variable from the dataset.
+
+### Data partition
+The last step of the preprocessing will be to create two partition for the machine learning algorithms. We will divide our data in two subsets, **Train** and **Test**, this partitition will follow a distribution of 80-20. The aim of this partition is to use the train dataset to fit the models and the predict the values of test dataset. In this way, we will be able to observe the real performance of our machine learning algorithms.
+```{r. echo=TRUE}
+n=createDataPartition(df$PassengerId,p=0.8,list=FALSE)
+train=df[n,]
+train=df[,-1]
+test=df[-n,]
+```
+
+Then, we have to define which variable will be the variable that we will predict using diverse algorithms, the variable that we will try to predict will be *Survived* and for that objective we will use *Sex*, *Age*, *Fare*, *Pclass* and *Embarked*.
+```{r. echo=TRUE}
+x_train=train[,(2:10)]
+y_train=train$Survived
+```
+
+## Analysis of the predictor variables
+
+## Recursive feature elimination
+Most machine learning algorithms are able to determine what features are important to predict the Y. But, we might be careful about which variables are significant.
+
+In order to select the important features, we are going to use the recursive feature elimination (RFE). The process follows three steps, firstly, we build a ML model on a training dataset and estimate the feature importance on the test dataset. Secondly, keeping priority to the most important variables, iterate through by building models of given subset sizes, that is, subgroups of most important predictors determined from step 1. Ranking of the predictors is recalculated in each iteration. Lastly, the model performances are compared across different subset sizes to arrive at the optimal number and list of final predictors.
+
+To implement this process we will use repeated cross validation with 5 repetition for every subset analysed. In addtion, the metric that we will use is the accuracy.
+```{r. echo=TRUE}
+set.seed(613)
+
+options(warn = -1)
+subsets = 1:9
+ctrl = rfeControl(functions = rfFuncs, method = "repeatedcv", repeats = 5, verbose = FALSE)
+lmProfile = rfe(x = x_train, y = y_train, sizes = subsets, rfeControl = ctrl,metric="Accuracy")
+lmProfile
+```
+Looking to the results we can observed that the best results are obtained with 9 variables, but the rfe() function returns us that the best option is to select only 5 variables. However, as we have a small sample for ML problem, we will use all the variables in order to improve our prediction. In addition, as the sample is relatively small, selecting all the variables will not have a real impact on the execution time.
+
+## Training and Tuning models.
+In this section, we will use different machine learning techniques in order to train our model and then, predict in test dataset.
+
+For all the models that we will apply in this section, we will use the repeated cross validation with 5 repetitions in order to fit our model as precisely as possible. 
+```{r. echo=TRUE}
+ctrl= trainControl(method='repeatedcv', number=5, savePredictions='final', classProbs=T, summaryFunction=twoClassSummary)
+```
+### Multivariate Adaptive Regression (MARS)
+This technique is a non-parametric regression technique and can be seen as an extension of linear models that automatically models non-linearities and tries to fit our dataset by the combination of linear models.
+```{r. echo=TRUE}
+train_mars=train(Survived~.,data=train,method="earth",metric='accuracy',trControl=ctrl)
+train_mars
+```
+### Random Forests (RF)
+This technique is an ensemble learning method that constructs a multitude of decision trees at training time and outputting the class that is the mode of the classes in the case of classification or mean prediction of the individual trees in the case of regression.
+```{r. echo=TRUE}
+train_rf=train(Survived~.,data=train,method="rf",metric='ROC',trControl=ctrl)
+train_rf
+```
+### Support vector machine (SVM)
+This technique is a supervised learning model with associated learning algorithms that analyze data. The aim of this technique is that a support vector machine constructs a hyperplane or set of hyperplanes in a high- or infinite-dimensional space, in that way we can use them for classification or regression. 
+```{r. echo=TRUE}
+train_svmRadial=train(Survived~.,data=train,method="svmRadial",metric='ROC',trControl=ctrl)
+train_svmRadial
+```
+### Adaptive Boosting (AdaBoost)
+This technique is a supervised learning technique that reduces the bias and variance of the model. This technique uses classification trees and then, it reduced it bias and variance.
+```{r. echo=TRUE}
+train_ada=train(Survived~.,data=train,method='adaboost',metric='ROC',trControl=ctrl)
+train_ada
+```
+### XGBosst booster: DART
+This technique uses classification trees and then, it adopts a dropout method from neural networks in order to boost regression trees.
+```{r message=FALSE, warning=FALSE}
+train_xgb=train(Survived~.,data=train,method='xgbDART',metric='ROC',trControl=ctrl)
+```
+### ROC curves
+ROC curves are a graphical plot that illustrate the diagnostic ability of a binary classifier system as its discrimination thresold is varied. ROC curves are created by plotting the sensitivity against the specificity at various threshold settings. The models will be better, the greater the area that holds the right part of the curve is.
+```{r warning=FALSE}
+evalm(train_mars,showplots = FALSE,title = "MARS")$roc
+
+evalm(train_rf,showplots = FALSE,title = "Random Forests")$roc
+
+evalm(train_svmRadial,showplots = FALSE,title = "SVM")$roc
+
+evalm(train_ada,showplots = FALSE,title = "AdaBoost")$roc
+
+evalm(train_xgb,showplots = FALSE,title = "xgbDart")$roc
+```
+Looking to the curves, we can observe how the worse methods are **SVM** and **MARS**, and the rest of method obtain very similar results, being **Random Forests** and **xgbDART** the best, having an area of 0.92.
+### Prediction and Confusion matrices
+We are going to predict the test results using the techniques below and will calculate the confusion matrices and some statistics. Furthermore, we are going to interpret the results obtained.
+```{r. echo=TRUE}
+p_mars=predict(train_mars,test)
+confusionMatrix(reference=test$Survived,data=p_mars,mode="everything",positive = "YES")
+
+p_rf=predict(train_rf,test)
+confusionMatrix(reference=test$Survived,data=p_rf,mode="everything",positive = "YES")
+
+p_svmRadial=predict(train_svmRadial,test)
+confusionMatrix(reference=test$Survived,data=p_svmRadial,mode="everything",positive = "YES")
+
+p_ada=predict(train_ada,test)
+confusionMatrix(reference=test$Survived,data=p_ada,mode="everything",positive = "YES")
+
+p_xgb=predict(train_xgb,test)
+confusionMatrix(reference=test$Survived,data=p_xgb,mode="everything",positive = "YES")
+```
+Firstly, we can assure that the methods with the worst results are the one with the worst ROC curves, **MARS** and **SVM**. However, **xgbDART** does not obtain the results we could expect from it, it is quite a rare situation because we do not have overfitting for sure, as this method contains several dropouts. In fact, the best two methods are **Random Forests** and **AdaBoost**, both having and outstanding performance in specificity values. In addition, as we have a balanced dataset, we can look to the accuracy as a good estimator of the performance of the model.
+
+## Ensembling model
+In statistics and machine learning, ensemble methods use multiple learning algorithms to obtain better predictive performance than could be obtained from any of the constituent learning algorithms alone. Ensembles combine multiple hypotheses to form a better hypothesis. The term ensemble is usually reserved for methods that generate multiple hypotheses using the same base learner.
+```{r. echo=TRUE}
+ctrlE = trainControl(method="repeatedcv", number=10, repeats=5, savePredictions=TRUE, classProbs=TRUE)
+algorithmList = c('rf', 'adaboost', 'earth', 'xgbDART', 'svmRadial')
+models = caretList(Survived~.,data=train, trControl=ctrlE, methodList=algorithmList)
+results = resamples(models)
+summary(results)
+```
+Once, we have created the ensembling, we can then, by Generalized Linear Model, add all the five models and create a new model that theoretically will perform better.
+```{r. echo=TRUE}
+stackControl = trainControl(method="repeatedcv", number=10, repeats=5, savePredictions=TRUE, classProbs=TRUE)
+stack_glm = caretStack(models, method="glm", metric="ROC", trControl=stackControl)
+stack_glm
+```
+Once we have created the model, we will predict the test results and then, we will see how the model performed.
+
+```{r. echo=TRUE}
+
+p_com=predict(stack_glm,test)
+confusionMatrix(reference=test$Survived,data=p_com,mode="everything",positive = "YES")
+```
+Looking to the results, we could think at first glance that this model is worst than, for instance, **adaBoost**, as we see that the accuracy is smaller. That is a fact, but we must gave into account that this model is a better model overall, even if it does not get the best accuracy value. 
+
+##Conclusion
+In this part of the project we have learned how to do machine learning algorithms, and prepare our data in order to obtain the best results we can. 
+
+Firstly, we have seen how important is to prepocess all the data in order to enhance the performance of our algorithm. In this process, we need to select the variables that we will use for the prediction, convert the categorical with plenty variables into dummy variables and divide the dataset into train and test set. Furthermore, if we have missing values we will need to deal with them, and in this project, we did that predicting them with k-nearest neighbors algorithm.
+
+Secondly, any machine learning problem will need to fit the model, in this process we will need to determine the way that will do the training. In our case we used the repeated cross validation in every step of the fitting. Furthermore, we have seen five different techniques to do the prediction: **MARS**, **Random Forests**, **SVM**, **AdaBoost** and **xgbDart**. Overall, five of them obtain a good performance, even if there are some of them that are better.
+
+Lastly, we did an ensemble of these five techniques, as we may imagine this ensemble stacked by a generalized linear model should perform better that the techniques did on their own. But, we have seen that this is not what happened in the reality.

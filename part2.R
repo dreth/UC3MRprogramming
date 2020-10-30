@@ -5,8 +5,8 @@ library(dplyr)
 library(RANN)
 library(MLeval)
 library(caretEnsemble)
-df=read.csv("C:/Users/ander/OneDrive/Escritorio/Master/Programming/titanic.csv",na.strings = c("",NA))
-g=read.csv("C:/Users/ander/OneDrive/Escritorio/Master/Programming/gender_submission.csv",na.strings = c("",NA))
+df=read.csv("data/titanic.csv",na.strings = c("",NA))
+g=read.csv("data/gender_submission.csv",na.strings = c("",NA))
 for (i in g$PassengerId[1]:g$PassengerId[length(g$PassengerId)]){
   df$Survived[i]=g$Survived[i-891]
 }
@@ -14,7 +14,7 @@ for (i in g$PassengerId[1]:g$PassengerId[length(g$PassengerId)]){
 
 
 #Remove columns that we are not going to use.
-df[df$Embarked==" "]<-NA
+df$Embarked <- ifelse(df$Embarked==" ",NA,df$Embarked)
 df=df[,-(4)]
 df=df[,-(6:8)]
 df=df[,-(7)]
@@ -52,12 +52,12 @@ y_train=train$Survived
 analy = x_train
 apply(analy[,c(2,3)], 2, FUN=function(x){c('min'=min(x), 'max'=max(x))})
 
-featurePlot(x = train[,(2:10)], 
-            y = train$Survived, 
-            plot = "box",
-            strip=strip.custom(par.strip.text=list(cex=.7)),
-            scales = list(x = list(relation="free"), 
-                          y = list(relation="free")))
+# featurePlot(x = train[,(2:10)], 
+#             y = train$Survived, 
+#             plot = "box",
+#             strip=strip.custom(par.strip.text=list(cex=.7)),
+#             scales = list(x = list(relation="free"), 
+#                           y = list(relation="free")))
 #RFE:
 
 set.seed(613)
