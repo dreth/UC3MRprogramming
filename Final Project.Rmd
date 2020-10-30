@@ -2,7 +2,10 @@
 title: 'R Final Project: The Titanic'
 author: "Daniel Alonso & Ander Iturburu"
 date: "October 28th, 2020"
-output: pdf_document
+output: 
+  pdf_document:
+    toc: true
+    toc_depth: 2
 ---
 
 
@@ -40,6 +43,7 @@ library(vcd)
 library(EnvStats)
 library(scales)
 ```
+
 ## How does the data look?\
 
 ### Importing the data\
