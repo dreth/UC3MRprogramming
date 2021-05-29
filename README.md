@@ -1,5 +1,6 @@
-# UC3MRprogramming
-little things done during the programming in R class and final project
+# R programming (UC3M)
+
+Homeworks/final project done for the programming in R class taken at UC3M 
 
 The final project was made by me and Ander.
 
